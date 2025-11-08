@@ -99,11 +99,35 @@ export const updateProfile = async (req, res) => {
             return res.status(400).json({ message: "Please provide a profile picture" });
         }
 
-        const uploadResponse = await cloudinary.uploader.upload(profilePic);
+        let profilePicUrl;
 
-        const updatedUser = await User.findByIdAndDelete(userId, { profilePic: uploadResponse.secure_url }, {new: true} );
+        // Check if profilePic is a URL (DiceBear or other external URL)
+        if (profilePic.startsWith('http://') || profilePic.startsWith('https://')) {
+            // It's already a URL, use it directly
+            profilePicUrl = profilePic;
+        } else {
+            // It's a base64 image, upload to Cloudinary
+            const uploadResponse = await cloudinary.uploader.upload(profilePic);
+            profilePicUrl = uploadResponse.secure_url;
+        }
 
-        res.status(200).json({message: "Profile updated successfully", updatedUser });
+        const updatedUser = await User.findByIdAndUpdate(
+            userId, 
+            { profilePic: profilePicUrl }, 
+            { new: true }
+        ).select("-password");
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            _id: updatedUser._id,
+            fullName: updatedUser.fullName,
+            email: updatedUser.email,
+            profilePic: updatedUser.profilePic,
+            createdAt: updatedUser.createdAt,
+        });
     } catch (error) {
         console.log("Error in update profile controller", error.message);
         res.status(500).json({ message: "Internal Server Error" });
