@@ -9,6 +9,30 @@ export default {
   plugins: [daisyui],
   daisyui: {
     themes: [
+      {
+        "black-gray": {
+          "primary": "#4b5563",
+          "primary-focus": "#6b7280",
+          "primary-content": "#ffffff",
+          "secondary": "#374151",
+          "secondary-focus": "#4b5563",
+          "secondary-content": "#ffffff",
+          "accent": "#1f2937",
+          "accent-focus": "#111827",
+          "accent-content": "#ffffff",
+          "neutral": "#111827",
+          "neutral-focus": "#030712",
+          "neutral-content": "#d1d5db",
+          "base-100": "#1f2937",
+          "base-200": "#111827",
+          "base-300": "#030712",
+          "base-content": "#f3f4f6",
+          "info": "#3b82f6",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+        },
+      },
       "light",
       "dark",
       "cupcake",
@@ -42,5 +66,6 @@ export default {
       "nord",
       "sunset",
     ],
+    darkTheme: "black-gray",
   },
 };

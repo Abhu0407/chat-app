@@ -48,14 +48,29 @@ export const useChatStore = create((set, get) => ({
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+
+    const authUser = useAuthStore.getState().authUser;
+    if (!authUser) return;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      // Check if this message is part of the current conversation
+      // Message should be between current user and selected user
+      const isMessageInCurrentChat = 
+        (newMessage.senderId === selectedUser._id && newMessage.receiverId === authUser._id) ||
+        (newMessage.senderId === authUser._id && newMessage.receiverId === selectedUser._id);
+      
+      if (!isMessageInCurrentChat) return;
 
-      set({
-        messages: [...get().messages, newMessage],
-      });
+      // Check if message already exists (avoid duplicates)
+      const existingMessages = get().messages;
+      const messageExists = existingMessages.some(msg => msg._id === newMessage._id);
+      
+      if (!messageExists) {
+        set({
+          messages: [...existingMessages, newMessage],
+        });
+      }
     });
   },
 

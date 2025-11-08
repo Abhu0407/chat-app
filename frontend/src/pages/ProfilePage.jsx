@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Camera, Mail, User } from "lucide-react";
+import { Camera, Mail, User, Sparkles } from "lucide-react";
+import AvatarSelector from "../components/skeletons/AvatarSelector";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -19,6 +21,12 @@ const ProfilePage = () => {
       setSelectedImg(base64Image);
       await updateProfile({ profilePic: base64Image });
     };
+  };
+
+  const handleAvatarSelect = async (avatarUrl) => {
+    setSelectedImg(avatarUrl);
+    setShowAvatarSelector(false);
+    await updateProfile({ profilePic: avatarUrl });
   };
 
   return (
@@ -39,29 +47,46 @@ const ProfilePage = () => {
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 "
               />
-              <label
-                htmlFor="avatar-upload"
-                className={`
-                  absolute bottom-0 right-0 
-                  bg-base-content hover:scale-105
-                  p-2 rounded-full cursor-pointer 
-                  transition-all duration-200
-                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
-                `}
-              >
-                <Camera className="w-5 h-5 text-base-200" />
-                <input
-                  type="file"
-                  id="avatar-upload"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageUpload}
+              <div className="absolute bottom-0 right-0 flex gap-2">
+                <label
+                  htmlFor="avatar-upload"
+                  className={`
+                    bg-base-content hover:scale-105
+                    p-2 rounded-full cursor-pointer 
+                    transition-all duration-200
+                    ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
+                  `}
+                  title="Upload image"
+                >
+                  <Camera className="w-5 h-5 text-base-200" />
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={isUpdatingProfile}
+                  />
+                </label>
+                <button
+                  onClick={() => setShowAvatarSelector(true)}
                   disabled={isUpdatingProfile}
-                />
-              </label>
+                  className={`
+                    bg-primary hover:scale-105
+                    p-2 rounded-full cursor-pointer 
+                    transition-all duration-200
+                    ${isUpdatingProfile ? "animate-pulse pointer-events-none opacity-50" : ""}
+                  `}
+                  title="Choose avatar"
+                >
+                  <Sparkles className="w-5 h-5 text-primary-content" />
+                </button>
+              </div>
             </div>
-            <p className="text-sm text-zinc-400">
-              {isUpdatingProfile ? "Uploading..." : "Click the camera icon to update your photo"}
+            <p className="text-sm text-zinc-400 text-center">
+              {isUpdatingProfile 
+                ? "Uploading..." 
+                : "Click the camera icon to upload a photo or the sparkle icon to choose an avatar"}
             </p>
           </div>
 
@@ -98,6 +123,13 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Avatar Selector Modal */}
+      <AvatarSelector
+        isOpen={showAvatarSelector}
+        onClose={() => setShowAvatarSelector(false)}
+        onSelect={handleAvatarSelect}
+      />
     </div>
   );
 };
